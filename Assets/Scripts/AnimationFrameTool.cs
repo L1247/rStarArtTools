@@ -1,5 +1,7 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using UnityEditor;
+using Object = UnityEngine.Object;
 
 public class AnimationFrameTool : EditorWindow
 {
@@ -9,16 +11,17 @@ public class AnimationFrameTool : EditorWindow
     bool                              myBool       = true;
     float                             myFloat      = 1.23f;
     string                            myString     = "Hello World";
-    private int                       currentFrame = 0;
+    private int                       currentFrame = 1;
+    private float                     _frameTime;
 
     void OnGUI()
     {
-        var activeGameObject = Selection.activeGameObject;
+        if (currentFrame == 0) currentFrame = 1;
+        var activeGameObject                = Selection.activeGameObject;
 
         var isPlaying = Application.isPlaying;
         if (activeGameObject != null)
         {
-            GUILayout.Label($"Current Select {activeGameObject.name}" , EditorStyles.boldLabel);
             var animator = activeGameObject.GetComponent<Animator>();
             if (animator != null && isPlaying)
             {
@@ -28,18 +31,25 @@ public class AnimationFrameTool : EditorWindow
                 var   clipWeight               = clipInfo.weight;
                 var   clipFrameRate            = clip.frameRate;
                 var   clipLength               = clip.length;
-                var   frameTime                = 1 / clipFrameRate * currentFrame;
+                var   frameTime                = 1 / clipFrameRate;
                 var   normalizedTime           = currentAnimatorStateInfo.normalizedTime;
                 float time                     = clipLength * normalizedTime;
-                if (time >= frameTime) currentFrame++;
-                Debug.Log($"{time} , {normalizedTime} , {currentFrame - 1}");
+                // if (time >= frameTime) currentFrame++;
+                var calculateFrame = (time / (frameTime * currentFrame));
+                if (calculateFrame >= 1) currentFrame++;
+                // currentFrame = (int)Mathf.Max(currentFrame , calculateFrame);
+                Debug.Log($"{time} , {frameTime} , {currentFrame} , {calculateFrame}");
             }
-        }
 
-        if (isPlaying == false)
-        {
-            currentFrame = 0;
+            GUILayout.Label($"Current Select {activeGameObject.name}" , EditorStyles.boldLabel);
+            GUILayout.Label($"Animator Name : {animator.runtimeAnimatorController.name}" ,        EditorStyles.boldLabel);
+            GUILayout.Label($"Current Frame : {currentFrame}");
         }
+    }
+
+    private void ResetFrame()
+    {
+        currentFrame = 1;
     }
 
     // Add menu named "My Window" to the Window menu
@@ -54,5 +64,16 @@ public class AnimationFrameTool : EditorWindow
             instance = window;
         }
         else instance.Focus();
+    }
+
+    private void OnEnable()
+    {
+        EditorApplication.playModeStateChanged += change => { OnChangeAction(change); };
+    }
+
+    private void OnChangeAction(PlayModeStateChange change)
+    {
+        if (change == PlayModeStateChange.EnteredPlayMode) currentFrame = 1;
+        if (change == PlayModeStateChange.ExitingPlayMode) currentFrame = 1;
     }
 }
