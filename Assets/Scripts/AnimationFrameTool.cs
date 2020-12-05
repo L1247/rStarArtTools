@@ -40,11 +40,12 @@ public class AnimationFrameTool : EditorWindow
                 Debug.Log($"{time} , {frameTime} , {currentFrame} , {calculateFrame}");
             }
 
+            var controllerPath  = AssetDatabase.GetAssetPath(animator.runtimeAnimatorController);
             var controller =
                 AssetDatabase.LoadAssetAtPath<AnimatorController>(
-                    AssetDatabase.GetAssetPath(animator.runtimeAnimatorController));
+                    controllerPath);
             GUILayout.Label($"Current Select {activeGameObject.name}" , EditorStyles.boldLabel);
-            GUILayout.Label($"Animator Name : {controller.name}" ,           EditorStyles.boldLabel);
+            GUILayout.Label($"Animator Name : {controller.name}\n{controllerPath}" ,           EditorStyles.boldLabel);
             GUILayout.Label($"Current Frame : {currentFrame}");
         }
     }
