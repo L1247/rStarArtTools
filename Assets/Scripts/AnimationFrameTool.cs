@@ -8,7 +8,8 @@ public class AnimationFrameTool : EditorWindow
     bool   myBool  = true;
     float  myFloat = 1.23f;
 
-    public static AnimationFrameTool instance;
+    public static  AnimationFrameTool instance;
+    private static float              _perFrameSecond = 1f / 30f;
 
     // Add menu named "My Window" to the Window menu
     [MenuItem("Window/AnimationFrameTool _F1")]
@@ -27,18 +28,24 @@ public class AnimationFrameTool : EditorWindow
     void OnGUI()
     {
         var activeGameObject = Selection.activeGameObject;
+
         if (activeGameObject != null)
         {
             GUILayout.Label($"Current Select {activeGameObject.name}" , EditorStyles.boldLabel);
-            var animator = activeGameObject.GetComponent<Animator>();
-            if (animator != null)
+            var animator  = activeGameObject.GetComponent<Animator>();
+            var isPlaying = Application.isPlaying;
+            if (animator != null && isPlaying)
             {
-                myString = EditorGUILayout.TextField("Text Field" , myString);
-
-                groupEnabled = EditorGUILayout.BeginToggleGroup("Optional Settings" , groupEnabled);
-                myBool       = EditorGUILayout.Toggle("Toggle" , myBool);
-                myFloat      = EditorGUILayout.Slider("Slider" , myFloat , -3 , 3);
-                EditorGUILayout.EndToggleGroup();
+                var clipInfo                 = animator.GetCurrentAnimatorClipInfo(0)[0];
+                var currentAnimatorStateInfo = animator.GetCurrentAnimatorStateInfo(0);
+                var clipWeight               = clipInfo.weight;
+                var clip                     = clipInfo.clip;
+                var clipFrameRate            = clip.frameRate;
+                var clipLength               = clip.length;
+                var length                   = currentAnimatorStateInfo.length;
+                var normalizedTime           = currentAnimatorStateInfo.normalizedTime;
+                var currentFrame             = /*(int)*/(clipWeight * (normalizedTime * 30));
+                Debug.Log($"{clipFrameRate} , {clipWeight} , {normalizedTime} , {currentFrame}");
             }
         }
     }
