@@ -1,7 +1,6 @@
-﻿using System;
+﻿using UnityEditor;
+using UnityEditor.Animations;
 using UnityEngine;
-using UnityEditor;
-using Object = UnityEngine.Object;
 
 public class AnimationFrameTool : EditorWindow
 {
@@ -41,15 +40,13 @@ public class AnimationFrameTool : EditorWindow
                 Debug.Log($"{time} , {frameTime} , {currentFrame} , {calculateFrame}");
             }
 
+            var controller =
+                AssetDatabase.LoadAssetAtPath<AnimatorController>(
+                    AssetDatabase.GetAssetPath(animator.runtimeAnimatorController));
             GUILayout.Label($"Current Select {activeGameObject.name}" , EditorStyles.boldLabel);
-            GUILayout.Label($"Animator Name : {animator.runtimeAnimatorController.name}" ,        EditorStyles.boldLabel);
+            GUILayout.Label($"Animator Name : {controller.name}" ,           EditorStyles.boldLabel);
             GUILayout.Label($"Current Frame : {currentFrame}");
         }
-    }
-
-    private void ResetFrame()
-    {
-        currentFrame = 1;
     }
 
     // Add menu named "My Window" to the Window menu
@@ -59,7 +56,7 @@ public class AnimationFrameTool : EditorWindow
         if (instance == null)
         {
             // Get existing open window or if none, make a new one:
-            AnimationFrameTool window = (AnimationFrameTool)EditorWindow.GetWindow(typeof(AnimationFrameTool));
+            AnimationFrameTool window = (AnimationFrameTool)GetWindow(typeof(AnimationFrameTool));
             window.Show();
             instance = window;
         }
