@@ -7,25 +7,15 @@ public class AnimationFrameTool : EditorWindow
 {
     public static  AnimationFrameTool instance;
     private static float              _perFrameSecond = 1f / 30f;
+    private        float              _frameTime;
     bool                              groupEnabled;
     bool                              myBool   = true;
     float                             myFloat  = 1.23f;
     string                            myString = "Hello World";
-    private float                     _frameTime;
 
-    [MenuItem("Window/AnimationFrameTool _F1")]
-    static void Init()
-    {
-        if (instance == null)
-        {
-            // Get existing open window or if none, make a new one:
-            AnimationFrameTool window = (AnimationFrameTool)GetWindow(typeof(AnimationFrameTool));
-            window.Show();
-            instance = window;
-        }
+    // Add menu named "My Window" to the Window menu
 
-        instance.Focus();
-    }
+    private void Update() => Repaint();
 
     void OnGUI()
     {
@@ -56,10 +46,24 @@ public class AnimationFrameTool : EditorWindow
                 GUILayout.Label($"Animator Name : {controller.name}\n{controllerPath}" , EditorStyles.boldLabel);
                 GUILayout.Label($"Current Frame : {currentFrame}");
             }
+            if (animator == null) GUILayout.Label($"※ Can't get animator from selected GameObject : {activeGameObject.name}" , EditorStyles.boldLabel);
         }
+        else GUILayout.Label($"※ Must select one GameObject");
+
+        if (isPlaying == false) GUILayout.Label($"※ Waiting for Editor to Play");
     }
 
-    // Add menu named "My Window" to the Window menu
+    [MenuItem("Window/AnimationFrameTool _F1")]
+    static void Init()
+    {
+        if (instance == null)
+        {
+            // Get existing open window or if none, make a new one:
+            AnimationFrameTool window = (AnimationFrameTool)GetWindow(typeof(AnimationFrameTool));
+            window.Show();
+            instance = window;
+        }
 
-    private void Update() => Repaint();
+        instance.Focus();
+    }
 }
