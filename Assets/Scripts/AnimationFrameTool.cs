@@ -1,4 +1,5 @@
-﻿using UnityEditor;
+﻿using System;
+using UnityEditor;
 using UnityEditor.Animations;
 using UnityEngine;
 
@@ -11,6 +12,20 @@ public class AnimationFrameTool : EditorWindow
     float                             myFloat  = 1.23f;
     string                            myString = "Hello World";
     private float                     _frameTime;
+
+    [MenuItem("Window/AnimationFrameTool _F1")]
+    static void Init()
+    {
+        if (instance == null)
+        {
+            // Get existing open window or if none, make a new one:
+            AnimationFrameTool window = (AnimationFrameTool)GetWindow(typeof(AnimationFrameTool));
+            window.Show();
+            instance = window;
+        }
+
+        instance.Focus();
+    }
 
     void OnGUI()
     {
@@ -45,16 +60,6 @@ public class AnimationFrameTool : EditorWindow
     }
 
     // Add menu named "My Window" to the Window menu
-    [MenuItem("Window/AnimationFrameTool _F1")]
-    static void Init()
-    {
-        if (instance == null)
-        {
-            // Get existing open window or if none, make a new one:
-            AnimationFrameTool window = (AnimationFrameTool)GetWindow(typeof(AnimationFrameTool));
-            window.Show();
-            instance = window;
-        }
-        else instance.Focus();
-    }
+
+    private void Update() => Repaint();
 }
