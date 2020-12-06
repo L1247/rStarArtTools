@@ -7,16 +7,14 @@ public class AnimationFrameTool : EditorWindow
     public static  AnimationFrameTool instance;
     private static float              _perFrameSecond = 1f / 30f;
     bool                              groupEnabled;
-    bool                              myBool       = true;
-    float                             myFloat      = 1.23f;
-    string                            myString     = "Hello World";
-    private int                       currentFrame = 1;
+    bool                              myBool   = true;
+    float                             myFloat  = 1.23f;
+    string                            myString = "Hello World";
     private float                     _frameTime;
 
     void OnGUI()
     {
-        if (currentFrame == 0) currentFrame = 1;
-        var activeGameObject                = Selection.activeGameObject;
+        var activeGameObject = Selection.activeGameObject;
 
         var isPlaying = Application.isPlaying;
         if (activeGameObject != null)
@@ -24,29 +22,25 @@ public class AnimationFrameTool : EditorWindow
             var animator = activeGameObject.GetComponent<Animator>();
             if (animator != null && isPlaying)
             {
-                var   clipInfo                 = animator.GetCurrentAnimatorClipInfo(0)[0];
-                var   currentAnimatorStateInfo = animator.GetCurrentAnimatorStateInfo(0);
-                var   clip                     = clipInfo.clip;
-                var   clipWeight               = clipInfo.weight;
-                var   clipFrameRate            = clip.frameRate;
-                var   clipLength               = clip.length;
-                var   frameTime                = 1 / clipFrameRate;
-                var   normalizedTime           = currentAnimatorStateInfo.normalizedTime;
-                float time                     = clipLength * normalizedTime;
-                // if (time >= frameTime) currentFrame++;
-                var calculateFrame = (time / (frameTime * currentFrame));
-                if (calculateFrame >= 1) currentFrame++;
-                // currentFrame = (int)Mathf.Max(currentFrame , calculateFrame);
-                Debug.Log($"{time} , {frameTime} , {currentFrame} , {calculateFrame}");
+                var clipInfo                 = animator.GetCurrentAnimatorClipInfo(0)[0];
+                var currentAnimatorStateInfo = animator.GetCurrentAnimatorStateInfo(0);
+                var clip                     = clipInfo.clip;
+                var clipWeight               = clipInfo.weight;
+                var clipFrameRate            = clip.frameRate;
+                var clipLength               = clip.length;
+                var frameTime                = 1 / clipFrameRate;
+                var normalizedTime           = currentAnimatorStateInfo.normalizedTime;
+                var time                     = clipLength * normalizedTime;
+                // https://gamedev.stackexchange.com/questions/165289/how-to-fetch-a-frame-number-from-animation-clip
+                var currentFrame   = (int)(clip.length * (normalizedTime % 1) * clipFrameRate) + 1;
+                var controllerPath = AssetDatabase.GetAssetPath(animator.runtimeAnimatorController);
+                var controller =
+                    AssetDatabase.LoadAssetAtPath<AnimatorController>(
+                        controllerPath);
+                GUILayout.Label($"Current Select {activeGameObject.name}" ,              EditorStyles.boldLabel);
+                GUILayout.Label($"Animator Name : {controller.name}\n{controllerPath}" , EditorStyles.boldLabel);
+                GUILayout.Label($"Current Frame : {currentFrame}");
             }
-
-            var controllerPath  = AssetDatabase.GetAssetPath(animator.runtimeAnimatorController);
-            var controller =
-                AssetDatabase.LoadAssetAtPath<AnimatorController>(
-                    controllerPath);
-            GUILayout.Label($"Current Select {activeGameObject.name}" , EditorStyles.boldLabel);
-            GUILayout.Label($"Animator Name : {controller.name}\n{controllerPath}" ,           EditorStyles.boldLabel);
-            GUILayout.Label($"Current Frame : {currentFrame}");
         }
     }
 
@@ -62,16 +56,5 @@ public class AnimationFrameTool : EditorWindow
             instance = window;
         }
         else instance.Focus();
-    }
-
-    private void OnEnable()
-    {
-        EditorApplication.playModeStateChanged += change => { OnChangeAction(change); };
-    }
-
-    private void OnChangeAction(PlayModeStateChange change)
-    {
-        if (change == PlayModeStateChange.EnteredPlayMode) currentFrame = 1;
-        if (change == PlayModeStateChange.ExitingPlayMode) currentFrame = 1;
     }
 }
