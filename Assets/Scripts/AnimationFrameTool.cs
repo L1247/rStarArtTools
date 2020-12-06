@@ -53,7 +53,7 @@ public class AnimationFrameTool : EditorWindow
         if (isPlaying == false) GUILayout.Label($"※ Waiting for Editor to Play");
     }
 
-    [MenuItem("Window/AnimationFrameTool _F1")]
+    [MenuItem("rSrarTools/AnimationFrameTool _F12")]
     static void Init()
     {
         if (instance == null)
