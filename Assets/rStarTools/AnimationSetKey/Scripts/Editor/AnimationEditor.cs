@@ -65,7 +65,8 @@ namespace rStar.Editor
 
         private static void AddKeyInternal(float value , string targetCurveName)
         {
-            AddKeyInCurrentTime(value , targetCurveName);
+            if (GetActiveAnimationClip() != null)
+                AddKeyInCurrentTime(value , targetCurveName);
         }
 
         private static AnimationClip GetActiveAnimationClip()
