@@ -66,7 +66,7 @@ namespace rStar.Editor
             var ts   = new List<T>();
             var type = typeof(T);
         #if UNITY_EDITOR
-            var guids2 = AssetDatabase.FindAssets($"t:{type}");
+            var guids2 = AssetDatabase.FindAssets(string.Format("t:{0}" , type));
             foreach (var guid2 in guids2)
             {
                 var assetPath = AssetDatabase.GUIDToAssetPath(guid2);
@@ -98,7 +98,7 @@ namespace rStar.Editor
             }
             else
             {
-                Debug.LogError($"Cloud Not Found Curve by curveName : {targetPropertName}");
+                Debug.LogError(string.Format("Cloud Not Found Curve by curveName : {0}" , targetPropertName));
             }
         }
 
