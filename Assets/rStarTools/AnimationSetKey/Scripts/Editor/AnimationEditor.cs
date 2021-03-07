@@ -15,21 +15,40 @@ namespace rStar.Editor
         [MenuItem("Tools/AnimationEditor/AddKey1 %q")]
         public static void AddKey1()
         {
-            Debug.Log($"AddKey1");
-            AddKeyInternal(Random.value);
+            AddKeyInternal(Random.value , "Breath");
         }
 
     #endregion
 
     #region Private Methods
 
-        private static void AddKeyInCurrentTime(float value)
+        private static void AddKeyInCurrentTime(float value , string targetCurveName)
         {
-            AnimationClip      clip            = GetActiveAnimationClip();
-            var                bindings        = AnimationUtility.GetCurveBindings(clip);
-            var                targetCurveName = "Breath";
-            AnimationCurve     targetCurve     = null;
-            EditorCurveBinding targetBinding   = default;
+            AnimationCurve targetCurve   = null;
+            var            targetBinding = GetCurveAndBinding(targetCurveName , ref targetCurve);
+            if (targetCurve != null)
+            {
+                var animationCurveKeys = targetCurve.keys;
+                var currentTime        = GetCurrentTime();
+                var curveKeys          = animationCurveKeys.ToList();
+                var sameKeyIndex       = curveKeys.FindIndex(kf => kf.time == currentTime);
+                if (sameKeyIndex >= 0) targetCurve.RemoveKey(sameKeyIndex);
+                targetCurve.AddKey(currentTime , value);
+                AnimationUtility.SetEditorCurve(GetActiveAnimationClip() , targetBinding , targetCurve);
+                EditorUtility.SetDirty(GetActiveAnimationClip());
+                InternalEditorUtility.RepaintAllViews();
+            }
+            else
+            {
+                Debug.LogError($"Cloud Not Found Curve by curveName : {targetCurveName}");
+            }
+        }
+
+        private static EditorCurveBinding GetCurveAndBinding(string targetCurveName , ref AnimationCurve targetCurve)
+        {
+            AnimationClip      clip          = GetActiveAnimationClip();
+            var                bindings      = AnimationUtility.GetCurveBindings(clip);
+            EditorCurveBinding targetBinding = default;
             foreach (var curveBinding in bindings)
             {
                 var propertyName = curveBinding.propertyName;
@@ -41,21 +60,12 @@ namespace rStar.Editor
                 }
             }
 
-            if (targetCurve == null) return;
-            var animationCurveKeys = targetCurve.keys;
-            var currentTime        = GetCurrentTime();
-            var curveKeys          = animationCurveKeys.ToList();
-            var sameKeyIndex       = curveKeys.FindIndex(kf => kf.time == currentTime);
-            if (sameKeyIndex >= 0) targetCurve.RemoveKey(sameKeyIndex);
-            targetCurve.AddKey(currentTime , value);
-            AnimationUtility.SetEditorCurve(clip , targetBinding , targetCurve);
-            EditorUtility.SetDirty(clip);
-            InternalEditorUtility.RepaintAllViews();
+            return targetBinding;
         }
 
-        private static void AddKeyInternal(float value)
+        private static void AddKeyInternal(float value , string targetCurveName)
         {
-            AddKeyInCurrentTime(value);
+            AddKeyInCurrentTime(value , targetCurveName);
         }
 
         private static AnimationClip GetActiveAnimationClip()
