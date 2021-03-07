@@ -127,7 +127,7 @@ namespace rStar.Editor
         {
             AnimationClip      clip          = GetActiveAnimationClip();
             var                bindings      = AnimationUtility.GetCurveBindings(clip);
-            EditorCurveBinding targetBinding = default;
+            EditorCurveBinding targetBinding = new EditorCurveBinding();
             foreach (var curveBinding in bindings)
             {
                 var propertyName = curveBinding.propertyName;
