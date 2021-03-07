@@ -1,6 +1,8 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using rStarTools.ScriptableObjects;
 using UnityEditor;
 using UnityEditorInternal;
 using UnityEngine;
@@ -15,41 +17,73 @@ namespace rStar.Editor
         [MenuItem("Tools/AnimationEditor/AddKey1 %q")]
         public static void AddKey1()
         {
-            AddKeyInternal(Random.value , "Breath");
+            AddKeyInternal("Q");
+        }
+
+        private static string GetPropertyName()
+        {
+            return "Breath";
         }
 
         [MenuItem("Tools/AnimationEditor/AddKey2 %w")]
         public static void AddKey2()
         {
-            AddKeyInternal(Random.value , "Breath");
+            AddKeyInternal("W");
         }
 
         [MenuItem("Tools/AnimationEditor/AddKey3 %e")]
         public static void AddKey3()
         {
-            AddKeyInternal(Random.value , "Breath");
+            AddKeyInternal("E");
         }
 
         [MenuItem("Tools/AnimationEditor/AddKey4 %r")]
         public static void AddKey4()
         {
-            AddKeyInternal(Random.value , "Breath");
+            AddKeyInternal("R");
         }
 
         [MenuItem("Tools/AnimationEditor/AddKey5 %t")]
         public static void AddKey5()
         {
-            AddKeyInternal(Random.value , "Breath");
+            AddKeyInternal("T");
+        }
+
+        public static AnimationKeyData GetAnimationKeyData(string keyCode)
+        {
+            var              animationKeyDatas = GetScriptableObjects<AnimationKeyData>();
+            AnimationKeyData animationKeyData  = animationKeyDatas.Find(data => data.name.Contains(keyCode));
+            return animationKeyData;
+        }
+
+        public static T GetScriptableObject<T>() where T : ScriptableObject
+        {
+            return GetScriptableObjects<T>().First();
+        }
+
+        public static List<T> GetScriptableObjects<T>() where T : ScriptableObject
+        {
+            var ts   = new List<T>();
+            var type = typeof(T);
+        #if UNITY_EDITOR
+            var guids2 = AssetDatabase.FindAssets($"t:{type}");
+            foreach (var guid2 in guids2)
+            {
+                var assetPath = AssetDatabase.GUIDToAssetPath(guid2);
+                ts.Add((T)AssetDatabase.LoadAssetAtPath(assetPath , type));
+            }
+        #endif
+            return ts;
         }
 
     #endregion
 
     #region Private Methods
 
-        private static void AddKeyInCurrentTime(float value , string targetCurveName)
+        private static void AddKeyInCurrentTime(float value , string targetPropertName)
         {
             AnimationCurve targetCurve   = null;
-            var            targetBinding = GetCurveAndBinding(targetCurveName , ref targetCurve);
+            var            targetBinding = GetCurveAndBinding(targetPropertName , ref targetCurve);
             if (targetCurve != null)
             {
                 var animationCurveKeys = targetCurve.keys;
@@ -64,14 +98,19 @@ namespace rStar.Editor
             }
             else
             {
-                Debug.LogError($"Cloud Not Found Curve by curveName : {targetCurveName}");
+                Debug.LogError($"Cloud Not Found Curve by curveName : {targetPropertName}");
             }
         }
 
-        private static void AddKeyInternal(float value , string targetCurveName)
+        private static void AddKeyInternal(string keyCode)
         {
             if (GetActiveAnimationClip() != null)
-                AddKeyInCurrentTime(value , targetCurveName);
+            {
+                var animationKeyData = GetAnimationKeyData(keyCode);
+                var value            = animationKeyData.GetValue();
+                var propertyName     = animationKeyData.propertyName;
+                AddKeyInCurrentTime(value , propertyName);
+            }
         }
 
         private static AnimationClip GetActiveAnimationClip()
@@ -84,7 +123,7 @@ namespace rStar.Editor
             return GetPropertyValueOfWindowsState<float>("currentTime");
         }
 
-        private static EditorCurveBinding GetCurveAndBinding(string targetCurveName , ref AnimationCurve targetCurve)
+        private static EditorCurveBinding GetCurveAndBinding(string targetPropertyName , ref AnimationCurve targetCurve)
         {
             AnimationClip      clip          = GetActiveAnimationClip();
             var                bindings      = AnimationUtility.GetCurveBindings(clip);
@@ -92,7 +131,7 @@ namespace rStar.Editor
             foreach (var curveBinding in bindings)
             {
                 var propertyName = curveBinding.propertyName;
-                if (propertyName == targetCurveName)
+                if (propertyName == targetPropertyName)
                 {
                     var curve = AnimationUtility.GetEditorCurve(clip , curveBinding);
                     targetBinding = curveBinding;
@@ -128,6 +167,12 @@ namespace rStar.Editor
         {
             Assembly editorAssembly = typeof(UnityEditor.Editor).Assembly;
             return editorAssembly;
+        }
+
+        private static float GetValue(string keyCode)
+        {
+            var value = GetAnimationKeyData(keyCode).GetValue();
+            return value;
         }
 
     #endregion
