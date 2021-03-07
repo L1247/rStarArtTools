@@ -18,6 +18,30 @@ namespace rStar.Editor
             AddKeyInternal(Random.value , "Breath");
         }
 
+        [MenuItem("Tools/AnimationEditor/AddKey2 %w")]
+        public static void AddKey2()
+        {
+            AddKeyInternal(Random.value , "Breath");
+        }
+
+        [MenuItem("Tools/AnimationEditor/AddKey3 %e")]
+        public static void AddKey3()
+        {
+            AddKeyInternal(Random.value , "Breath");
+        }
+
+        [MenuItem("Tools/AnimationEditor/AddKey4 %r")]
+        public static void AddKey4()
+        {
+            AddKeyInternal(Random.value , "Breath");
+        }
+
+        [MenuItem("Tools/AnimationEditor/AddKey5 %t")]
+        public static void AddKey5()
+        {
+            AddKeyInternal(Random.value , "Breath");
+        }
+
     #endregion
 
     #region Private Methods
@@ -44,6 +68,22 @@ namespace rStar.Editor
             }
         }
 
+        private static void AddKeyInternal(float value , string targetCurveName)
+        {
+            if (GetActiveAnimationClip() != null)
+                AddKeyInCurrentTime(value , targetCurveName);
+        }
+
+        private static AnimationClip GetActiveAnimationClip()
+        {
+            return GetPropertyValueOfWindowsState<AnimationClip>("activeAnimationClip");
+        }
+
+        private static float GetCurrentTime()
+        {
+            return GetPropertyValueOfWindowsState<float>("currentTime");
+        }
+
         private static EditorCurveBinding GetCurveAndBinding(string targetCurveName , ref AnimationCurve targetCurve)
         {
             AnimationClip      clip          = GetActiveAnimationClip();
@@ -61,22 +101,6 @@ namespace rStar.Editor
             }
 
             return targetBinding;
-        }
-
-        private static void AddKeyInternal(float value , string targetCurveName)
-        {
-            if (GetActiveAnimationClip() != null)
-                AddKeyInCurrentTime(value , targetCurveName);
-        }
-
-        private static AnimationClip GetActiveAnimationClip()
-        {
-            return GetPropertyValueOfWindowsState<AnimationClip>("activeAnimationClip");
-        }
-
-        private static float GetCurrentTime()
-        {
-            return GetPropertyValueOfWindowsState<float>("currentTime");
         }
 
         private static T GetPropertyValueOfWindowsState<T>(string propertyName)
